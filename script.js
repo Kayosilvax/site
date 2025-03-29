@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const photoCards = document.querySelectorAll(".photo-card");
     const backgroundMusic = document.getElementById("background-music");
+    let currentAudio = null;
 
     // Tentar tocar a música de fundo automaticamente
     function startBackgroundMusic() {
@@ -13,8 +14,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Ativa a música de fundo quando o usuário clica em qualquer lugar da página
     document.addEventListener("click", startBackgroundMusic, { once: true });
 
-    let currentAudio = null;
-
     // Toca a música associada à foto ao clicar
     photoCards.forEach((card) => {
         const audio = card.querySelector(".audio");
@@ -24,8 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
             }
-            currentAudio = audio;
             audio.play();
+            currentAudio = audio;
         });
     });
 
@@ -45,35 +44,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let particles = [];
 
-    class Firework {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.size = Math.random() * 3 + 2;
-            this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
-            this.velocity = {
-                x: (Math.random() - 0.5) * 5,
-                y: (Math.random() - 0.5) * 5,
-            };
-            this.alpha = 1;
-            this.gravity = 0.05;
-        }
-
-        update() {
-            this.velocity.y += this.gravity;
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
-            this.alpha -= 0.02;
-        }
-
-        draw() {
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-        }
+    function Firework(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 3 + 2;
+        this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+        this.velocity = {
+            x: (Math.random() - 0.5) * 5,
+            y: (Math.random() - 0.5) * 5,
+        };
+        this.alpha = 1;
+        this.gravity = 0.05;
     }
+
+    Firework.prototype.update = function () {
+        this.velocity.y += this.gravity;
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= 0.02;
+    };
+
+    Firework.prototype.draw = function () {
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    };
 
     function createFireworks(x, y) {
         for (let i = 0; i < 50; i++) {
@@ -83,10 +80,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function animate() {
         ctx.clearRect(0, 0, fireworks.width, fireworks.height);
-        particles = particles.filter(p => p.alpha > 0);
-        particles.forEach(p => {
+        particles.forEach((p, i) => {
             p.update();
             p.draw();
+            if (p.alpha <= 0) particles.splice(i, 1);
         });
         requestAnimationFrame(animate);
     }
