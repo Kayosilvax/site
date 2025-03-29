@@ -1,47 +1,48 @@
 document.addEventListener("DOMContentLoaded", function () {
     const photoCards = document.querySelectorAll(".photo-card");
-    const backgroundMusic = document.getElementById("background-music");
-    let currentAudio = null;
+    let currentPlayingIframe = null;
 
-    // Tentar tocar a música de fundo automaticamente
-    function startBackgroundMusic() {
-        backgroundMusic.volume = 0.5; // Define o volume (ajuste como quiser)
-        backgroundMusic.play().catch(() => {
-            console.log("Autoplay bloqueado. Clique na página para iniciar a música.");
-        });
-    }
-
-    // Ativa a música de fundo quando o usuário clica em qualquer lugar da página
-    document.addEventListener("click", startBackgroundMusic, { once: true });
-
-    // Toca a música associada à foto ao clicar
     photoCards.forEach((card) => {
-        const audio = card.querySelector(".audio");
-
         card.addEventListener("click", function () {
-            if (currentAudio && currentAudio !== audio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
+            stopAllSpotifyMusic();
+
+            const iframe = card.querySelector(".spotify-player");
+            if (iframe) {
+                playSpotifyMusic(iframe);
+                currentPlayingIframe = iframe;
             }
-            audio.play();
-            currentAudio = audio;
         });
     });
 
-    // ---- FOGOS DE ARTIFÍCIO ----
+    function stopAllSpotifyMusic() {
+        if (currentPlayingIframe) {
+            const src = currentPlayingIframe.src;
+            currentPlayingIframe.src = "";
+            currentPlayingIframe.src = src; // Reinicia o iframe para parar a música
+        }
+    }
+
+    function playSpotifyMusic(iframe) {
+        const src = iframe.src;
+        iframe.src = ""; 
+        setTimeout(() => {
+            iframe.src = src; // Recarrega o iframe para garantir que a música toque corretamente
+        }, 100);
+    }
+
+    // ---- Efeito de Fogos de Artifício ----
     const fireworks = document.createElement("canvas");
     fireworks.style.position = "fixed";
     fireworks.style.top = "0";
     fireworks.style.left = "0";
     fireworks.style.width = "100vw";
     fireworks.style.height = "100vh";
-    fireworks.style.pointerEvents = "none"; // Não interfere nos cliques
+    fireworks.style.pointerEvents = "none";
     document.body.appendChild(fireworks);
 
     const ctx = fireworks.getContext("2d");
     fireworks.width = window.innerWidth;
     fireworks.height = window.innerHeight;
-
     let particles = [];
 
     function Firework(x, y) {
@@ -94,6 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
         createFireworks(x, y);
     }
 
-    setInterval(launchFireworks, 500); // Lança fogos a cada 0.5s
+    setInterval(launchFireworks, 500);
     animate();
 });
