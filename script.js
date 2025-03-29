@@ -1,48 +1,49 @@
 document.addEventListener("DOMContentLoaded", function () {
     const photoCards = document.querySelectorAll(".photo-card");
-    let currentPlayingIframe = null;
+    const backgroundMusic = document.getElementById("background-music");
 
+    // Tentar tocar a música de fundo automaticamente
+    function startBackgroundMusic() {
+        backgroundMusic.volume = 0.5; // Define o volume (ajuste como quiser)
+        backgroundMusic.play().catch(() => {
+            console.log("Autoplay bloqueado. Clique na página para iniciar a música.");
+        });
+    }
+
+    // Ativa a música de fundo quando o usuário clica em qualquer lugar da página
+    document.addEventListener("click", startBackgroundMusic, { once: true });
+
+    // Toca a música associada à foto ao clicar
     photoCards.forEach((card) => {
-        card.addEventListener("click", function () {
-            stopAllSpotifyMusic();
+        const audio = card.querySelector(".audio");
 
-            const iframe = card.querySelector(".spotify-player");
-            if (iframe) {
-                playSpotifyMusic(iframe);
-                currentPlayingIframe = iframe;
-            }
+        card.addEventListener("click", function () {
+            stopAllPhotoMusic();
+            audio.play();
         });
     });
 
-    function stopAllSpotifyMusic() {
-        if (currentPlayingIframe) {
-            const src = currentPlayingIframe.src;
-            currentPlayingIframe.src = "";
-            currentPlayingIframe.src = src; // Reinicia o iframe para parar a música
-        }
+    function stopAllPhotoMusic() {
+        document.querySelectorAll(".audio").forEach((audio) => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
     }
 
-    function playSpotifyMusic(iframe) {
-        const src = iframe.src;
-        iframe.src = ""; 
-        setTimeout(() => {
-            iframe.src = src; // Recarrega o iframe para garantir que a música toque corretamente
-        }, 100);
-    }
-
-    // ---- Efeito de Fogos de Artifício ----
+    // ---- FOGOS DE ARTIFÍCIO ----
     const fireworks = document.createElement("canvas");
     fireworks.style.position = "fixed";
     fireworks.style.top = "0";
     fireworks.style.left = "0";
     fireworks.style.width = "100vw";
     fireworks.style.height = "100vh";
-    fireworks.style.pointerEvents = "none";
+    fireworks.style.pointerEvents = "none"; // Não interfere nos cliques
     document.body.appendChild(fireworks);
 
     const ctx = fireworks.getContext("2d");
     fireworks.width = window.innerWidth;
     fireworks.height = window.innerHeight;
+
     let particles = [];
 
     function Firework(x, y) {
@@ -95,6 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
         createFireworks(x, y);
     }
 
-    setInterval(launchFireworks, 500);
+    setInterval(launchFireworks, 500); // Lança fogos a cada 0.5s
     animate();
 });
